@@ -1,0 +1,20 @@
+/* CSS file */
+@namespace s "library://ns.adobe.com/flex/spark";
+@namespace mx "library://ns.adobe.com/flex/mx";
+mx|ApplicationControlBar 
+{
+	dropShadowEnabled: false;
+}
+
+global
+{
+	font-family: Verdana;
+	font-size: 10;
+	font-weight: normal;
+}
+
+/*mx|TileList {
+	rollOverColor: #ffff99;
+	selectionColor: #f8b84e;
+}*/
+

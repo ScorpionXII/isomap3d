@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx" width="452" height="300" close="titlewindow_closeHandler(event)">
+	<fx:Script>
+		<![CDATA[
+			import mx.events.CloseEvent;
+			import mx.managers.PopUpManager;
+			
+			protected function titlewindow_closeHandler(event:CloseEvent):void
+			{
+				close();
+			}
+			
+			public function close():void
+			{
+				PopUpManager.removePopUp(this);
+			}
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:TextArea id="txtArea" x="10" y="10" width="428" height="221"/>
+	<s:Button id="btn2" x="368" y="239" label="Button"/>
+	<s:Button id="btn1" x="215" y="239" label="Button" width="145"/>
+</s:TitleWindow>

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		   xmlns:mx="library://ns.adobe.com/flex/mx" cornerRadius="0" addedToStage="initControl()" mouseOver="objClientRect_mouseOverHandler(event)">
+	<fx:Metadata>
+		[Event(name="objrotateLeft", type="cu.isomap3d.components.ControlEvent")]
+		[Event(name="objrotateRight", type="cu.isomap3d.components.ControlEvent")]
+		[Event(name="objDelete", type="cu.isomap3d.components.ControlEvent")]
+	</fx:Metadata>
+
+	<fx:Script>
+		<![CDATA[
+			import flash.utils.getTimer;
+			
+			import gs.TweenLite;
+			private var _time:int;
+			
+			protected function initControl():void
+			{
+				addEventListener(Event.ENTER_FRAME, checkAutoHide);				
+			}
+			
+			protected function checkAutoHide(event:Event):void
+			{
+				if(alpha == 0)
+				{
+					_time = getTimer();
+					visible = false;
+				}
+				else
+				{
+					visible = true;
+					if (getTimer() - _time >= 2000)
+						TweenLite.to(this, .2, {alpha:0});
+				}
+			}
+			
+			protected function btnRL_mouseDownHandler(event:MouseEvent):void
+			{
+				_time = getTimer();
+				var e:ControlEvent = new ControlEvent("objrotateLeft",0);
+				dispatchEvent(e);
+			}
+
+			protected function btnRR_mouseDownHandler(event:MouseEvent):void
+			{
+				_time = getTimer();
+				var e:ControlEvent = new ControlEvent("objrotateRight",0);
+				dispatchEvent(e);
+			}
+
+
+			protected function btnDelete_mouseDownHandler(event:MouseEvent):void
+			{
+				var e:ControlEvent = new ControlEvent("objDelete",0);
+				dispatchEvent(e);
+			}
+
+
+			protected function objClientRect_mouseOverHandler(event:MouseEvent):void
+			{
+				_time = getTimer();
+			}
+
+		]]>
+	</fx:Script>
+
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<mx:VBox horizontalCenter="0" verticalCenter="0" verticalGap="5" borderStyle="solid" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" cornerRadius="10" backgroundColor="#FFFFFF" backgroundAlpha="0.85">	
+		<mx:Button y="4" skin="@Embed(source='assets/_rotateLBtn.png')" overSkin="@Embed(source='assets/_rotateLOverBtn.png')" horizontalCenter="0"  id="btnRL" mouseDown="btnRL_mouseDownHandler(event)" toolTip="Rotate Object Left"/>
+		<mx:Button y="35" skin="@Embed(source='assets/_rotateRBtn.png')" overSkin="@Embed(source='assets/_rotateROverBtn.png')" horizontalCenter="0" id="btnRR" mouseDown="btnRR_mouseDownHandler(event)" toolTip="Rotate Object Right"/>
+		<mx:Button y="66" skin="@Embed(source='assets/_delBtn.png')" overSkin="@Embed(source='assets/_delOverBtn.png')" horizontalCenter="0" id="btnDelete" mouseDown="btnDelete_mouseDownHandler(event)" toolTip="Delete Object"/>
+	</mx:VBox>
+</mx:Canvas>

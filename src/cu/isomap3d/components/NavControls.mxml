@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		   xmlns:mx="library://ns.adobe.com/flex/mx" width="70" height="360">
+	
+	<fx:Metadata>
+		[Event(name="nvzoomValueChange", type="cu.isomap3d.components.ControlEvent")]
+		[Event(name="nvmoveUp", type="cu.isomap3d.components.ControlEvent")]
+		[Event(name="nvmoveDown", type="cu.isomap3d.components.ControlEvent")]
+		[Event(name="nvmoveLeft", type="cu.isomap3d.components.ControlEvent")]
+		[Event(name="nvmoveRight", type="cu.isomap3d.components.ControlEvent")]
+		[Event(name="nvrotateLeft", type="cu.isomap3d.components.ControlEvent")]
+		[Event(name="nvrotateRight", type="cu.isomap3d.components.ControlEvent")]
+		[Event(name="nvRestore", type="cu.isomap3d.components.ControlEvent")]
+	</fx:Metadata>
+
+	<fx:Script>
+		<![CDATA[
+			import mx.events.SliderEvent;
+			
+			protected function btnZoomIn_clickHandler(event:MouseEvent):void
+			{
+				if(sldZoom.value != sldZoom.maximum)
+				{
+					var value:Number = sldZoom.value+=sldZoom.snapInterval;
+					var e:ControlEvent = new ControlEvent("nvzoomValueChange", value);
+					dispatchEvent(e);
+				}
+			}
+			
+			protected function btnZoomOut_clickHandler(event:MouseEvent):void
+			{
+				if(sldZoom.value != sldZoom.minimum)
+				{
+					var value:Number = sldZoom.value-=sldZoom.snapInterval;
+					var e:ControlEvent = new ControlEvent("nvzoomValueChange", value);
+					dispatchEvent(e);
+				}
+			}
+
+			protected function sldZoom_changeHandler(event:SliderEvent):void
+			{
+				var e:ControlEvent = new ControlEvent("nvzoomValueChange", event.value);
+				dispatchEvent(e);
+			}
+
+
+			protected function btnUp_mouseDownHandler(event:MouseEvent):void
+			{
+				var e:ControlEvent = new ControlEvent("nvmoveUp", 10);
+				dispatchEvent(e);
+			}
+
+
+			protected function btnDown_mouseDownHandler(event:MouseEvent):void
+			{
+				var e:ControlEvent = new ControlEvent("nvmoveDown", 10);
+				dispatchEvent(e);
+			}
+
+
+			protected function btnLeft_mouseDownHandler(event:MouseEvent):void
+			{
+				var e:ControlEvent = new ControlEvent("nvmoveLeft", 10);
+				dispatchEvent(e);
+			}
+
+
+			protected function btnRight_mouseDownHandler(event:MouseEvent):void
+			{
+				var e:ControlEvent = new ControlEvent("nvmoveRight", 10);
+				dispatchEvent(e);
+			}
+
+
+			protected function btnRL_clickHandler(event:MouseEvent):void
+			{
+				var e:ControlEvent = new ControlEvent("nvrotateLeft", 0);
+				dispatchEvent(e);
+			}
+
+
+			protected function btnRR_clickHandler(event:MouseEvent):void
+			{
+				var e:ControlEvent = new ControlEvent("nvrotateRight", 0);
+				dispatchEvent(e);
+			}
+
+			protected function btnRestore_mouseDownHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				var e:ControlEvent = new ControlEvent("nvRestore", 0);
+				dispatchEvent(e);
+			}
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<mx:Canvas horizontalScrollPolicy="off" verticalScrollPolicy="off">
+		<mx:Image source="@Embed(source='assets/_moveBase.png')"/>
+		<mx:Button skin="@Embed(source='assets/_movUpBtn.png')" overSkin="@Embed(source='assets/_movUpOverBtn.png')" id="btnUp" mouseDown="btnUp_mouseDownHandler(event)" toolTip="Move Camera Up" horizontalCenter="0" top="8"/>
+		<mx:Button skin="@Embed(source='assets/_centerBtn.png')" overSkin="@Embed(source='assets/_centerOverBtn.png')" horizontalCenter="0" verticalCenter="0" id="btnRestore" mouseDown="btnRestore_mouseDownHandler(event)" toolTip="Center Camera"/>
+		<mx:Button skin="@Embed(source='assets/_movRightBtn.png')" overSkin="@Embed(source='assets/_movRightOverBtn.png')" id="btnRight" toolTip="Move Camera Right" mouseDown="btnRight_mouseDownHandler(event)" verticalCenter="0" right="8"/>
+		<mx:Button skin="@Embed(source='assets/_movDownBtn.png')" overSkin="@Embed(source='assets/_movDownOverBtn.png')" id="btnDown" toolTip="Move Camera Down" mouseDown="btnDown_mouseDownHandler(event)" horizontalCenter="0" bottom="8"/>
+		<mx:Button skin="@Embed(source='assets/_movLeftBtn.png')" overSkin="@Embed(source='assets/_movLeftOverBtn.png')" id="btnLeft" toolTip="Move Camera Left" mouseDown="btnLeft_mouseDownHandler(event)" verticalCenter="0" left="8"/>
+	</mx:Canvas>
+	<mx:Button skin="@Embed(source='assets/_plusBtn.png')" overSkin="@Embed(source='assets/_plusOverBtn.png')" x="23" y="80" id="btnZoomIn" click="btnZoomIn_clickHandler(event)" toolTip="Zoom In"/>
+	<mx:Button skin="@Embed(source='assets/_minusBtn.png')" overSkin="@Embed(source='assets/_minusOverBtn.png')" x="23" y="260" id="btnZoomOut" click="btnZoomOut_clickHandler(event)" toolTip="Zoom Out"/>
+	<mx:Button skin="@Embed(source='assets/_rotateLBtn.png')" x="22" y="290" overSkin="@Embed(source='assets/_rotateLOverBtn.png')" id="btnRL" click="btnRL_clickHandler(event)" toolTip="Rotate Left"/>
+	<mx:Button skin="@Embed(source='assets/_rotateRBtn.png')" x="22" y="320" overSkin="@Embed(source='assets/_rotateROverBtn.png')" id="btnRR" click="btnRR_clickHandler(event)" toolTip="Rotate Right"/>
+	<mx:VSlider x="23" y="100" thumbSkin="@Embed(source='assets/_slideBtn.png')" thumbOverSkin="@Embed(source='assets/_slideOverBtn.png')" thumbDownSkin="@Embed(source='assets/_slideOverBtn.png')" trackSkin="@Embed(source='assets/_trackBar.png')" height="158" width="15" minimum="-25" maximum="25" value="0" tickInterval="5" snapInterval="5" id="sldZoom" change="sldZoom_changeHandler(event)" toolTip="Zoom Slide"/>
+</mx:Canvas>

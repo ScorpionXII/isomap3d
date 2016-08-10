@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<modelpack>
+	<model>
+		<thumb>edifBlue.png</thumb>
+		<caption>Big Blue</caption>
+		<source>edifBlue.3ds</source>
+	</model>
+	<model>
+		<thumb>edifCream.png</thumb>
+		<caption>Big Cream</caption>
+		<source>edifCream.3ds</source>
+	</model>
+	<model>
+		<thumb>comp.png</thumb>
+		<caption>Middle Company</caption>
+		<source>comp.3ds</source>
+	</model>
+</modelpack>

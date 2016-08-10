@@ -1,0 +1,402 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" layout="absolute" minWidth="955" minHeight="600" backgroundGradientAlphas="[1.0, 1.0]" backgroundGradientColors="[#DFDFDF, #FCFCFC]" applicationComplete="initApp()" xmlns:s="library://ns.adobe.com/flex/spark" xmlns:components="cu.isomap3d.components.*">
+	<fx:Style source="Styles.css"/>
+	<fx:Script>
+		<![CDATA[
+			import adobe.utils.CustomActions;
+			
+			import away3d.animators.utils.AWTweener;
+			import away3d.core.base.Object3D;
+			import away3d.core.math.Number3D;
+			import away3d.events.MouseEvent3D;
+			import away3d.loaders.Max3DS;
+			import away3d.materials.BitmapFileMaterial;
+			import away3d.primitives.Plane;
+			
+			import cu.isomap3d.components.ControlEvent;
+			import cu.isomap3d.core.Building;
+			import cu.isomap3d.core.GridMap;
+			import cu.isomap3d.core.MainViewport;
+			import cu.isomap3d.core.PreviewViewport;
+			import cu.isomap3d.core.UIViewport;
+			import cu.isomap3d.core.XMMParser;
+			
+			import flash.desktop.Clipboard;
+			import flash.desktop.ClipboardFormats;
+			import flash.utils.getTimer;
+			
+			import flashx.textLayout.operations.PasteOperation;
+			
+			import gs.TweenLite;
+			import gs.events.TweenEvent;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.core.UIComponent;
+			import mx.effects.Blur;
+			import mx.effects.Effect;
+			import mx.events.ListEvent;
+			import mx.events.ResizeEvent;
+			import mx.managers.PopUpManager;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.xml.SimpleXMLDecoder;
+			
+			import spark.filters.BlurFilter;
+			
+			[Bindable]
+			private var acTextures:ArrayCollection;
+			
+			[Bindable]
+			private var acModels:ArrayCollection;
+			
+			private var mainViewport:MainViewport;
+			private var previewViewport:PreviewViewport;
+			private var map:GridMap;
+			
+			//TEMPORAL LOAD TESTS
+			private var xmlObject:Object; 
+			
+			//TEMPORAL FILTERS TESTS
+			
+			public function initApp():void
+			{
+				stage.frameRate = 60;
+					
+				textureService.send();
+				modelService.send();
+				
+				mainViewport = new MainViewport(cvViewPort);
+				cvViewPort.addChild(mainViewport as UIViewport);
+				
+				previewViewport = new PreviewViewport(cvPreview);
+				cvPreview.addChild(previewViewport as UIViewport);
+				
+				map = new GridMap();
+				map.addEventListener("objClick",showObjControl);
+				
+				mainViewport.scene.addChild(map);
+				
+				//TEST ENTER FRAME
+				//addEventListener(Event.ENTER_FRAME,function():void{lbtest.text = getTimer().toString();});
+			}
+			
+			public function clearMap():void
+			{
+				cvViewPort.removeChild(mainViewport);
+				mainViewport = new MainViewport(cvViewPort);
+				cvViewPort.addChild(mainViewport);
+				
+				map = new GridMap();
+				map.addEventListener("objClick", showObjControl);
+				mainViewport.scene.addChild(map);
+				
+				cbbSwapViewStack.selectedIndex = 0;
+				vstackResources.selectedIndex = 0;
+				
+				if(tlistSurfaces!=null)
+					tlistSurfaces.selectedIndex = -1;
+				
+				if(tlistBuildings!=null)
+					tlistBuildings.selectedIndex = -1;
+			}
+
+			protected function navControl_nvzoomValueChangeHandler(event:ControlEvent):void
+			{
+				TweenLite.to(mainViewport.camera, 1, {zoom:50 + event.value});
+			}
+
+
+			protected function navControl_nvmoveUpHandler(event:ControlEvent):void
+			{
+				mainViewport.moveF();
+			}
+
+
+			protected function navControl_nvmoveDownHandler(event:ControlEvent):void
+			{
+				mainViewport.moveB();
+			}
+
+
+			protected function navControl_nvmoveLeftHandler(event:ControlEvent):void
+			{
+				mainViewport.moveL();
+			}
+
+
+			protected function navControl_nvmoveRightHandler(event:ControlEvent):void
+			{
+				mainViewport.moveR();
+			}
+
+
+			protected function navControl_nvrotateLeftHandler(event:ControlEvent):void
+			{
+				if(Math.abs(mainViewport.cameraContainer.rotationY)>=360)
+					mainViewport.cameraContainer.rotationY = 0;
+				
+				if(mainViewport.cameraContainer.rotationY%45==0)
+				{
+					var rotValue:Number = mainViewport.cameraContainer.rotationY;
+					rotValue-=45;
+					TweenLite.to(mainViewport.cameraContainer, .5, {rotationY:rotValue});
+				}
+				
+			}
+
+
+			protected function navControl_nvrotateRightHandler(event:ControlEvent):void
+			{
+				if(Math.abs(mainViewport.cameraContainer.rotationY)>=360)
+					mainViewport.cameraContainer.rotationY = 0;
+				
+				if(mainViewport.cameraContainer.rotationY%45==0)
+				{
+					var rotValue:Number = mainViewport.cameraContainer.rotationY;
+					rotValue+=45;
+					TweenLite.to(mainViewport.cameraContainer, .5, {rotationY:rotValue});
+				}
+			}
+
+
+			protected function navControl_nvRestoreHandler(event:ControlEvent):void
+			{
+				//mainViewPort.camera.position = new Number3D(300, 300, -300);
+				var x:int = mainViewport.initialCameraPos.x;
+				var y:int = mainViewport.initialCameraPos.y;
+				var z:int = mainViewport.initialCameraPos.z;
+				
+				TweenLite.to(mainViewport.camera, .5, {x:x, y:y, z:z});
+			}
+
+
+			protected function cvViewPort_resizeHandler(event:ResizeEvent):void
+			{
+				if(mainViewport!=null)
+					mainViewport.viewPositionAndBounds();
+			}
+
+
+			protected function textureService_resultHandler(event:ResultEvent):void
+			{
+				acTextures = event.result.texturepack.texture;
+			}
+			
+			protected function modelService_resultHandler(event:ResultEvent):void
+			{
+				acModels = event.result.modelpack.model;
+			}
+			
+
+			protected function cbbSwapViewStack_changeHandler(event:ListEvent):void
+			{
+				map.creationState = cbbSwapViewStack.selectedLabel.toString();
+				vstackResources.selectedIndex = cbbSwapViewStack.selectedIndex;
+				
+				updatePreview();
+			}
+			
+			public function updatePreview():void
+			{
+
+				if(cbbSwapViewStack.selectedLabel.toString() == "Surfaces" && tlistSurfaces!=null && tlistSurfaces.selectedIndex!=-1)
+				{
+					var objSurface:Plane = new Plane({width:10 , height:10, material:new BitmapFileMaterial("textures/"+acTextures[tlistSurfaces.selectedIndex].source)});
+					previewViewport.object = objSurface;
+				}
+				
+				if(cbbSwapViewStack.selectedLabel.toString() == "Buildings" && tlistBuildings!=null && tlistBuildings.selectedIndex!=-1)
+				{
+					var objBuilding:Object3D = new Object3D();
+					objBuilding = Max3DS.load("models/"+acModels[tlistBuildings.selectedIndex].source);
+					previewViewport.object = objBuilding;
+				}
+			}
+
+			protected function tlistSurfaces_changeHandler(event:ListEvent):void
+			{
+				updatePreview();
+				
+				map.texture = acTextures[tlistSurfaces.selectedIndex].source;
+				map.current = null;
+			}
+			
+			protected function tlistBuildings_changeHandler(event:ListEvent):void
+			{
+				updatePreview();
+				
+				map.model = acModels[tlistBuildings.selectedIndex].source;
+				map.current = null;
+			}
+			
+			protected function showObjControl(event:Event):void
+			{
+				objControl.alpha = 0;
+				
+				if (objControl.width + mouseX < stage.stageWidth)
+					objControl.x = mouseX;
+				else
+					objControl.x = mouseX - objControl.width;
+				
+				if (objControl.height + mouseY < stage.stageHeight)
+					objControl.y = mouseY;
+				else
+					objControl.y = mouseY - objControl.height;
+				
+				TweenLite.to(objControl, .5, {alpha:1});
+			}
+			
+			protected function objControl_objrotateLeftHandler(event:ControlEvent):void
+			{
+				map.current.rotate(new Number3D(0,1,0), 90);
+			}
+
+
+			protected function objControl_objrotateRightHandler(event:ControlEvent):void
+			{
+				map.current.rotate(new Number3D(0,1,0), -90);
+			}
+
+			protected function objControl_objDeleteHandler(event:ControlEvent):void
+			{
+				map.removeCurrentObject();
+				TweenLite.to(objControl, .2, {alpha:0});
+			}
+
+
+			protected function cvPreview_resizeHandler(event:ResizeEvent):void
+			{
+				if(previewViewport!=null)
+					previewViewport.viewPositionAndBounds();
+			}
+
+
+			protected function imgSave_clickHandler(event:MouseEvent):void
+			{
+				var exportAlert:CustomAlert = PopUpManager.createPopUp(this, CustomAlert, true) as CustomAlert;
+				exportAlert.title = "Xml Map Format Exporter";
+				exportAlert.btn1.label = "Copy to Clipboard";
+				exportAlert.btn2.label = "Close";
+				exportAlert.isPopUp = false;
+				
+				exportAlert.btn1.addEventListener(MouseEvent.CLICK, function():void
+				{
+					Clipboard.generalClipboard.setData(ClipboardFormats.TEXT_FORMAT, exportAlert.txtArea.text, false);
+				});
+				
+				exportAlert.btn2.addEventListener(MouseEvent.CLICK, function():void{ exportAlert.close(); });
+				
+				PopUpManager.centerPopUp(exportAlert);
+				
+				var xmlTemp:XML = XMMParser.XMLGenerator(map.surfacesArray, map.buildingsArray);
+				
+				exportAlert.txtArea.text = xmlTemp;
+			}
+
+			protected function imgOpen_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				var importAlert:CustomAlert = PopUpManager.createPopUp(this, CustomAlert, true) as CustomAlert;
+				importAlert.title = "Xml Map Format Importer";
+				importAlert.btn1.label = "Parse Data";
+				importAlert.btn2.label = "Close";
+				importAlert.isPopUp = false;
+				
+				importAlert.btn1.addEventListener(MouseEvent.CLICK, function():void
+				{
+					clearMap();
+					
+					//mainViewport.goTopView();
+					
+					var xmlStr:String = importAlert.txtArea.text;
+					var xmlDoc:XMLDocument = new XMLDocument(xmlStr);
+					var decoder:SimpleXMLDecoder = new SimpleXMLDecoder(true);
+					xmlObject = decoder.decodeXML(xmlDoc);
+					
+					XMMParser.XMLInverse(xmlObject, map);
+					
+					importAlert.close();
+				});
+				
+				importAlert.btn2.addEventListener(MouseEvent.CLICK, function():void{ importAlert.close(); });
+				
+				PopUpManager.centerPopUp(importAlert);
+			}
+
+			protected function button1_clickHandler(event:MouseEvent):void
+			{
+				mainViewport.goTopView();
+			}
+			
+			protected function button2_clickHandler(event:MouseEvent):void
+			{
+				mainViewport.go3DView();
+			}
+
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+		<mx:HTTPService id="textureService" url="utils/textures.xml" result="textureService_resultHandler(event)"/>
+		<mx:HTTPService id="modelService" url="utils/models.xml" result="modelService_resultHandler(event)"/>
+	</fx:Declarations>
+	
+	<mx:ApplicationControlBar width="100%" cornerRadius="0" fillAlphas="[1.0, 1.0]" fillColors="[#716D69, #585440]">
+		<mx:Image id="imgNew" source="@Embed(source='assets/_newFile.png')" scaleContent="false" width="22" height="22" mouseOver="{imgNew.alpha=.5}" mouseOut="{imgNew.alpha=1;}"/>
+		<mx:Image id="imgOpen" source="@Embed(source='assets/_openFile.png')" scaleContent="false" width="22" height="22" mouseOver="{imgOpen.alpha=.5}" mouseOut="{imgOpen.alpha=1;}" click="imgOpen_clickHandler(event)"/>
+		<mx:Image id="imgSave" source="@Embed(source='assets/_save.png')" scaleContent="false" width="22" height="22" mouseOver="{imgSave.alpha=.5}" mouseOut="{imgSave.alpha=1;}" click="imgSave_clickHandler(event)"/>
+		<s:Button label="2D" click="button1_clickHandler(event)"/>
+		<s:Button label="3D" click="button2_clickHandler(event)"/>
+	</mx:ApplicationControlBar>
+	<mx:Canvas id="cvViewPort" width="100%" height="100%" resize="cvViewPort_resizeHandler(event)" y="33">
+	</mx:Canvas>
+	<mx:VBox backgroundColor="#FFFFFF" width="300" cornerRadius="5" borderStyle="solid" right="10" bottom="10" top="80" borderColor="#878A8C" backgroundAlpha="0.7" horizontalAlign="center" verticalAlign="middle" verticalGap="5" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+		<mx:VBox width="100%" height="200">
+			<mx:Label text="Preview"/>
+			<mx:Canvas id="cvPreview" width="100%" height="100%" resize="cvPreview_resizeHandler(event)"/>
+		</mx:VBox>
+		<mx:VBox width="100%" height="80%" horizontalAlign="center" verticalAlign="middle">
+			<mx:ComboBox id="cbbSwapViewStack" editable="false" width="100%" fillAlphas="[0.0, 0.0, 0.0, 0.0]" dataProvider="{vstackResources}" change="cbbSwapViewStack_changeHandler(event)"/>
+			<mx:ViewStack id="vstackResources" width="100%" height="100%">
+				
+				<mx:VBox label="Surfaces" width="100%" height="100%">
+					<mx:TileList id="tlistSurfaces" width="100%" height="100%" rowHeight="75" columnWidth="95" borderStyle="none" backgroundAlpha="0" dataProvider="{acTextures}" change="tlistSurfaces_changeHandler(event)">
+						<mx:itemRenderer>
+							<fx:Component>
+								<mx:VBox horizontalScrollPolicy="off" verticalScrollPolicy="off" horizontalAlign="center" verticalAlign="middle">
+									<mx:Image source="assets/{data.thumb}" width="77" height="52"/>
+									<s:Label text="{data.caption}" textAlign="center"/>
+								</mx:VBox>
+							</fx:Component>
+						</mx:itemRenderer>
+					</mx:TileList>
+				</mx:VBox>
+				
+				<mx:VBox label="Buildings" width="100%" height="100%">
+					<mx:TileList id="tlistBuildings" width="100%" height="100%" rowHeight="75" columnWidth="95" borderStyle="none" backgroundAlpha="0" dataProvider="{acModels}" change="tlistBuildings_changeHandler(event)">
+						<mx:itemRenderer>
+							<fx:Component>
+								<mx:VBox horizontalScrollPolicy="off" verticalScrollPolicy="off" horizontalAlign="center" verticalAlign="middle">
+									<mx:Image source="assets/{data.thumb}" width="77" height="52"/>
+									<s:Label text="{data.caption}" textAlign="center"/>
+								</mx:VBox>
+							</fx:Component>
+						</mx:itemRenderer>
+					</mx:TileList>
+				</mx:VBox>
+				
+				<mx:VBox label="Others" width="100%" height="100%">
+					<mx:TileList width="100%" height="100%" borderStyle="none" backgroundAlpha="0">
+						
+					</mx:TileList>
+				</mx:VBox>
+			
+			</mx:ViewStack>
+		
+		</mx:VBox>
+	</mx:VBox>
+	<components:NavControls id="navControl" top="100" right="330" nvzoomValueChange="navControl_nvzoomValueChangeHandler(event)" nvmoveUp="navControl_nvmoveUpHandler(event)" nvmoveDown="navControl_nvmoveDownHandler(event)" nvmoveLeft="navControl_nvmoveLeftHandler(event)" nvmoveRight="navControl_nvmoveRightHandler(event)" nvrotateLeft="navControl_nvrotateLeftHandler(event)" nvrotateRight="navControl_nvrotateRightHandler(event)" nvRestore="navControl_nvRestoreHandler(event)" alpha="0.85"/>
+	<components:ObjectControl id="objControl" visible="true" objrotateLeft="objControl_objrotateLeftHandler(event)" objrotateRight="objControl_objrotateRightHandler(event)" objDelete="objControl_objDeleteHandler(event)" alpha="0"/>
+</mx:Application>
