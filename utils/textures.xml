@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<texturepack>
+	<texture>
+		<thumb>grass.png</thumb>
+		<caption>Grass</caption>
+		<source>grass.jpg</source>
+	</texture>
+	<texture>
+		<thumb>corner.png</thumb>
+		<caption>Corner</caption>
+		<source>corner1.jpg</source>
+	</texture>
+	<texture>
+		<thumb>cross.png</thumb>
+		<caption>Cross</caption>
+		<source>cross.jpg</source>
+	</texture>
+	<texture>
+		<thumb>road.png</thumb>
+		<caption>Road</caption>
+		<source>roadv.jpg</source>
+	</texture>
+</texturepack>
