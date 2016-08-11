@@ -1,5 +1,6 @@
 IsoMap3D Framework
 ==================
+![alt tag](https://raw.githubusercontent.com/scorpionxii/isomap3d/master/screenshot.jpg)
 
 Getting Started
 ---------------
