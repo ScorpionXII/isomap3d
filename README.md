@@ -15,4 +15,4 @@ IsoMap3D born in late 2009 when I was finishing the Informatics Sciences Enginee
 
 DEMO
 ----
-You can play with a fully functional DEMO at http://scorpionxii.github.io/isomap3d/
+You can play with a fully functional testing DEMO at http://scorpionxii.github.io/isomap3d/
