@@ -23,3 +23,7 @@ Third-party Projects that was used.
 Away3D (as graphic engine) http://away3d.com
 
 GreenSock (to smooth some animations) https://greensock.com
+
+TODO
+----
+Now that Flash is dead I've been thinking migrate Isomap3d to a new 3D engine compatible with HTML5 Canvas element.
