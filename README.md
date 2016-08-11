@@ -20,5 +20,6 @@ You can play with a fully functional testing DEMO at http://scorpionxii.github.i
 
 Third-party Projects that was used.
 -----------------------------------
-Away3D (as graphic engine) http://away3d.com 
+Away3D (as graphic engine) http://away3d.com
+
 GreenSock (to smooth some animations) https://greensock.com
