@@ -18,12 +18,6 @@ DEMO
 ----
 You can play with a fully functional testing DEMO at http://scorpionxii.github.io/isomap3d/
 
-AUTHORS
--------
-Heriberto A. Martin
-
-Jorge L. Ruiz
-
 Third-party Projects that was used.
 -----------------------------------
 Away3D (as graphic engine) http://away3d.com
