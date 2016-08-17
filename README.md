@@ -21,6 +21,7 @@ You can play with a fully functional testing DEMO at http://scorpionxii.github.i
 AUTHORS
 -------
 Heriberto A. Martin
+
 Jorge L. Ruiz
 
 Third-party Projects that was used.
