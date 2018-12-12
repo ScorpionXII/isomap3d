@@ -12,7 +12,7 @@ Because the viewport camera have a configuration to represents isometric project
 
 What can I do with this?
 ------------------------
-IsoMap3D was born in late 2009, when I was finishing the race of Engineering in Computer Science at the University. At that time 3D visualization techniques on the web were primitive and although there were alternatives like WebGL, did not allow much interaction to create a virtual environment for the design of a city or implement the logic of a MMO game. Away3D then seemed to offer enough power to achieve, but it was necessary to implement all the logic for a basic environment that allowed interact with elements such as streets, buildings, trees to create maps and implement an editor to work visually with each item. IsoMap3D eventually became my diploma thesis in mid 2010. Therefore, it is oriented mainly to create web-based online as virtual models of cities SimCity or video games etc ...
+IsoMap3D was born in late 2009, when I was finishing the career of Engineering in Computer Science at the University. At that time 3D visualization techniques on the web were primitive and although there were alternatives like WebGL, did not allow much interaction to create a virtual environment for the design of a city or implement the logic of a MMO game. Away3D then seemed to offer enough power to achieve, but it was necessary to implement all the logic for a basic environment that allowed interact with elements such as streets, buildings, trees to create maps and implement an editor to work visually with each item. IsoMap3D eventually became my diploma thesis in mid 2010. Therefore, it is oriented mainly to create web-based online as virtual models of cities SimCity or video games etc ...
 
 DEMO
 ----
